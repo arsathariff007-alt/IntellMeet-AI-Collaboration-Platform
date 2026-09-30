@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Tailwind v4 native element utility overrides */
+body {
+  background-color: #f8fafc; /* Matches slate-50 */
+  color: #1e293b;            /* Matches slate-800 */
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
