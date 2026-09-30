@@ -18,7 +18,10 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+   crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false
+}));
 app.use(express.json());
 
 // Mount API Routers
