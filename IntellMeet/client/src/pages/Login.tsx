@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom'; // Native router path navigator
 import { Mail, Lock, Video, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
-// Dynamic production api routing fallback selector channel map
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -21,8 +18,8 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Connects dynamically to your live production cloud server URL or your local fallback path
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      // Hardcoded directly to your secure, live running backend service login gateway path
+      const response = await fetch('https://intellmeet-ai-collaboration-platform-1.onrender.com/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -37,6 +34,7 @@ export const Login: React.FC = () => {
       // If credentials check out, update global store parameters instantly
       setAuth({ _id: data._id, name: data.name, email: data.email, role: data.role }, data.accessToken, data.refreshToken);
       alert(`Welcome back, ${data.name}!`);
+      navigate('/dashboard'); // Routes user cleanly to dashboard upon authentication success
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -106,7 +104,7 @@ export const Login: React.FC = () => {
           </button>
         </form>
 
-        {/* ✅ Dynamic switch navigation option to open the register account panel */}
+        {/* Dynamic switch navigation option to open the register account panel */}
         <div className="mt-6 text-center text-sm text-slate-500">
           Don't have an account?{' '}
           <button 
