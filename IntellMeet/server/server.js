@@ -12,14 +12,16 @@ const initSocket = require("./socket/socketHandler");
 const app = express();
 const server = http.createServer(app);
 
-// Configure explicit cross-origin tracking rules for production deployment
+// 1. Configure robust global CORS management settings
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// Relax Helmet rules so it does not block the secure cross-origin fetch pipeline
+// 2. CRUCIAL: Intercept and answer HTTP OPTIONS preflight handshake requests instantly
+app.options("*", cors());
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false
