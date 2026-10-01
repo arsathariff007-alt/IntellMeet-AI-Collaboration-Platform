@@ -12,18 +12,10 @@ const initSocket = require("./socket/socketHandler");
 const app = express();
 const server = http.createServer(app);
 
-// 1. Configure robust global CORS management settings
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// 1. Fully open up the CORS layer to automatically answer data fetches and OPTIONS preflights smoothly
+app.use(cors());
 
-// 2. CRUCIAL: Intercept and answer HTTP OPTIONS preflight handshake requests instantly
-app.options(/(.*)/, cors());
-
-
-
+// 2. Relax Helmet headers so it does not intercept secure cloud domain assets
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false
