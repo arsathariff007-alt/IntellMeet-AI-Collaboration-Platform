@@ -16,7 +16,7 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      // Hardcoded your exact verified, live Render backend server URL directly into the fetch handler
+      // Directed explicitly to your secure, live running backend service endpoint route path
       const response = await fetch('https://onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
