@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Video, AlertCircle } from 'lucide-react';
 
-// Dynamic production api routing fallback selector channel map
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -19,8 +16,8 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      // Replaced hardcoded address string with your active environment configuration variable path
-      const response = await fetch(`${API_URL}/api/auth/register`, {
+      // Hardcoded your exact verified, live Render backend server URL directly into the fetch handler
+      const response = await fetch('https://onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
