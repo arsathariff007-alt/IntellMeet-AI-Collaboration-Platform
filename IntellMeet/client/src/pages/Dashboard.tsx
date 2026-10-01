@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'; // Imported the client-side rout
 import { Video, PlusCircle, LogOut, Keyboard } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
+// Dynamic production api routing fallback selector channel map
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, accessToken, logout } = useAuthStore();
@@ -17,7 +20,8 @@ export const Dashboard: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/meetings/create', {
+      // Replaced hardcoded address string with your active environment configuration variable path
+      const response = await fetch(`${API_URL}/api/meetings/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
