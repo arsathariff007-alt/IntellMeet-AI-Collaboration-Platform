@@ -20,7 +20,8 @@ app.use(cors({
 }));
 
 // 2. CRUCIAL: Intercept and answer HTTP OPTIONS preflight handshake requests instantly
-app.options("(.*)", cors());
+app.options(/(.*)/, cors());
+
 
 
 app.use(helmet({
