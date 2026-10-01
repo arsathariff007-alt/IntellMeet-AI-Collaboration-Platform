@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'; // Native router path navigator
 import { Mail, Lock, Video, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
+// Dynamic production api routing fallback selector channel map
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -18,8 +21,8 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Connect directly to your live backend running on port 8000
-      const response = await fetch('http://localhost:8000/api/auth/login', {
+      // Connects dynamically to your live production cloud server URL or your local fallback path
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
