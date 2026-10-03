@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Video, Mic, MicOff, VideoOff, ScreenShare, PhoneOff, Users, MessageSquare } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, ScreenShare, PhoneOff, Users } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export const Room: React.FC = () => {
@@ -11,7 +11,7 @@ export const Room: React.FC = () => {
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoStopped, setIsVideoStopped] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
-  const [participantsCount, setParticipantsCount] = useState(1);
+  const [participantsCount] = useState(1); // Cleared the unused setParticipantsCount method statement
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
