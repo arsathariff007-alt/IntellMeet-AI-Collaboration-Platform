@@ -132,6 +132,7 @@ const Room: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log("🔥 ROOM USEEFFECT STARTED 🔥");
     if (!roomId) {
       console.error('[Room] No room ID found');
       return;
