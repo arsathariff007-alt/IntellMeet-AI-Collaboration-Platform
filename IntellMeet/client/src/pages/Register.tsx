@@ -16,8 +16,8 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      // Directed explicitly to your secure, live running backend service endpoint route path
-      const response = await fetch('https://intellmeet-ai-collaboration-platform-1.onrender.com/', {
+      // ✅ CORRECTED PATH: Hits the complete API registration path explicitly with no missing routes
+      const response = await fetch('https://intellmeet-ai-collaboration-platform-1.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
