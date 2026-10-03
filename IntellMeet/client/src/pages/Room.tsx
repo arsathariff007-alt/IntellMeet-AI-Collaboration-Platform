@@ -84,23 +84,40 @@ const roomId = roomCode;
       }
     };
 
-    peerConnection.ontrack = (event) => {
-      console.log('[WebRTC] Remote track received');
+   peerConnection.ontrack = (event) => {
+  console.log('[WebRTC] Remote track received');
 
-      const remoteStream = event.streams[0];
+  const remoteStream = event.streams[0];
 
-      if (remoteVideoRef.current && remoteStream) {
-        remoteVideoRef.current.srcObject = remoteStream;
+  if (!remoteStream) {
+    console.error('[WebRTC] No remote stream received');
+    return;
+  }
 
-        remoteVideoRef.current.play().catch((error) => {
-          console.log(
-            '[WebRTC] Remote video autoplay waiting:',
-            error
-          );
-        });
-      }
+  if (remoteVideoRef.current) {
+    const video = remoteVideoRef.current;
+
+    console.log(
+      '[WebRTC] Setting remote video stream:',
+      remoteStream.id
+    );
+
+    if (video.srcObject !== remoteStream) {
+      video.srcObject = remoteStream;
+    }
+
+    video.onloadedmetadata = () => {
+      console.log('[WebRTC] Remote video metadata loaded');
+
+      video.play().catch((error) => {
+        console.error(
+          '[WebRTC] Remote video play failed:',
+          error
+        );
+      });
     };
-
+  }
+};
     peerConnection.onconnectionstatechange = () => {
       console.log(
         '[WebRTC] Connection state:',
@@ -828,13 +845,13 @@ const roomId = roomCode;
           <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* LOCAL VIDEO */}
             <div className="relative bg-black rounded-3xl overflow-hidden border border-white/[0.08] min-h-[300px]">
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                className="w-full h-full object-cover scale-x-[-1]"
-              />
+             <video
+  ref={remoteVideoRef}
+  autoPlay
+  playsInline
+  controls={false}
+  className="w-full h-full object-cover"
+/>
 
               {isVideoStopped && (
                 <div className="absolute inset-0 bg-slate-950 flex items-center justify-center">
