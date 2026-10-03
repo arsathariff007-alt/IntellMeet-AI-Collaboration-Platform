@@ -1,3 +1,4 @@
+```tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
@@ -34,62 +35,111 @@ export const Room: React.FC = () => {
   const { user } = useAuthStore();
 
   const socketRef = useRef<Socket | null>(null);
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const localStreamRef = useRef<MediaStream | null>(null);
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const peerConnectionRef =
+    useRef<RTCPeerConnection | null>(null);
 
-  const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+  const pendingIceCandidatesRef =
+    useRef<RTCIceCandidateInit[]>([]);
 
-  const [isAudioMuted, setIsAudioMuted] = useState(false);
-  const [isVideoStopped, setIsVideoStopped] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] =
+    useState(false);
 
-  const [connected, setConnected] = useState(false);
-  const [participantsCount, setParticipantsCount] = useState(1);
+  const [isVideoStopped, setIsVideoStopped] =
+    useState(false);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [messageText, setMessageText] = useState('');
-  const [showChat, setShowChat] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] =
+    useState(false);
 
-  const [summary, setSummary] = useState('');
-  const [summaryLoading, setSummaryLoading] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
+  const [connected, setConnected] =
+    useState(false);
+
+  const [participantsCount, setParticipantsCount] =
+    useState(1);
+
+  const [messages, setMessages] =
+    useState<ChatMessage[]>([]);
+
+  const [messageText, setMessageText] =
+    useState('');
+
+  const [showChat, setShowChat] =
+    useState(false);
+
+  const [summary, setSummary] =
+    useState('');
+
+  const [summaryLoading, setSummaryLoading] =
+    useState(false);
+
+  const [showSummary, setShowSummary] =
+    useState(false);
 
   const userId = user?._id || '';
   const userName = user?.name || 'User';
 
   /*
-   * Create WebRTC peer connection
+   * CREATE WEBRTC PEER CONNECTION
    */
-  const createPeerConnection = (socket: Socket) => {
-    console.log('[WebRTC] Creating peer connection');
+  const createPeerConnection = (
+    socket: Socket
+  ) => {
+    console.log(
+      '[WebRTC] Creating peer connection'
+    );
 
-    const peerConnection = new RTCPeerConnection({
-      iceServers: [
-        {
-          urls: 'stun:stun.l.google.com:19302',
-        },
-      ],
-    });
+    const peerConnection =
+      new RTCPeerConnection({
+        iceServers: [
+          {
+            urls: 'stun:stun.l.google.com:19302',
+          },
+        ],
+      });
 
-    peerConnection.onicecandidate = (event) => {
-      if (event.candidate && roomId) {
-        console.log('[WebRTC] Sending ICE candidate');
+    /*
+     * ICE CANDIDATE
+     */
+    peerConnection.onicecandidate = (
+      event
+    ) => {
+      if (
+        event.candidate &&
+        roomId
+      ) {
+        console.log(
+          '[WebRTC] Sending ICE candidate'
+        );
 
-        socket.emit('ice-candidate', {
-          roomCode: roomId,
-          candidate: event.candidate,
-        });
+        socket.emit(
+          'ice-candidate',
+          {
+            roomCode: roomId,
+            candidate: event.candidate,
+          }
+        );
       }
     };
 
-    peerConnection.ontrack = (event) => {
-      console.log('[WebRTC] Remote track received');
+    /*
+     * REMOTE VIDEO
+     */
+    peerConnection.ontrack = (
+      event
+    ) => {
+      console.log(
+        '[WebRTC] Remote track received'
+      );
 
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+      if (
+        remoteVideoRef.current
+      ) {
+        remoteVideoRef.current.srcObject =
+          event.streams[0];
 
         remoteVideoRef.current
           .play()
@@ -102,164 +152,305 @@ export const Room: React.FC = () => {
       }
     };
 
-    peerConnection.onconnectionstatechange = () => {
-      console.log(
-        '[WebRTC] Connection state:',
-        peerConnection.connectionState
-      );
-
-      if (
-        peerConnection.connectionState === 'connected'
-      ) {
+    /*
+     * CONNECTION STATE
+     */
+    peerConnection.onconnectionstatechange =
+      () => {
         console.log(
-          '========================================'
-        );
-        console.log(
-          '[WebRTC] TWO-WAY VIDEO CONNECTION SUCCESSFUL'
-        );
-        console.log(
-          '========================================'
-        );
-      }
-
-      if (
-        peerConnection.connectionState === 'failed' ||
-        peerConnection.connectionState === 'disconnected'
-      ) {
-        console.log(
-          '[WebRTC] Peer connection problem:',
+          '[WebRTC] Connection state:',
           peerConnection.connectionState
         );
-      }
-    };
 
-    peerConnection.oniceconnectionstatechange = () => {
-      console.log(
-        '[WebRTC] ICE state:',
-        peerConnection.iceConnectionState
-      );
-    };
+        if (
+          peerConnection.connectionState ===
+          'connected'
+        ) {
+          console.log(
+            '========================================'
+          );
+
+          console.log(
+            '[WebRTC] TWO-WAY VIDEO CONNECTION SUCCESSFUL'
+          );
+
+          console.log(
+            '========================================'
+          );
+        }
+
+        if (
+          peerConnection.connectionState ===
+            'failed' ||
+          peerConnection.connectionState ===
+            'disconnected'
+        ) {
+          console.log(
+            '[WebRTC] Peer connection problem:',
+            peerConnection.connectionState
+          );
+        }
+      };
+
+    /*
+     * ICE STATE
+     */
+    peerConnection.oniceconnectionstatechange =
+      () => {
+        console.log(
+          '[WebRTC] ICE state:',
+          peerConnection.iceConnectionState
+        );
+      };
 
     return peerConnection;
   };
 
+  /*
+   * ROOM INITIALIZATION
+   */
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId) {
+      console.error(
+        '[Room] No room ID found'
+      );
+
+      return;
+    }
 
     let mounted = true;
 
     const startRoom = async () => {
+      let socket: Socket | null = null;
+
       try {
-        console.log('========================================');
-        console.log('[Room] Starting room');
-        console.log('[Room] Room ID:', roomId);
-        console.log('[Room] User ID:', userId);
-        console.log('[Room] User Name:', userName);
-        console.log('[Room] Socket URL:', SOCKET_URL);
-        console.log('========================================');
+        console.log(
+          '========================================'
+        );
+
+        console.log(
+          '[Room] STARTING ROOM'
+        );
+
+        console.log(
+          '[Room] Room ID:',
+          roomId
+        );
+
+        console.log(
+          '[Room] User ID:',
+          userId
+        );
+
+        console.log(
+          '[Room] User Name:',
+          userName
+        );
+
+        console.log(
+          '[Room] Socket URL:',
+          SOCKET_URL
+        );
+
+        console.log(
+          '========================================'
+        );
 
         /*
-         * 1. CAMERA + MICROPHONE
+         * ========================================
+         * 1. CONNECT SOCKET.IO FIRST
+         * ========================================
          */
-        const stream =
-          await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true,
-          });
 
-        if (!mounted) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
+        console.log(
+          '[Socket] Creating Socket.io connection...'
+        );
 
-        console.log('[Media] Camera and microphone ready');
+        socket = io(
+          SOCKET_URL,
+          {
+            transports: [
+              'polling',
+              'websocket',
+            ],
 
-        localStreamRef.current = stream;
+            reconnection: true,
 
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
+            reconnectionAttempts: 10,
 
-        /*
-         * 2. SOCKET.IO CONNECTION
-         */
-        console.log('[Socket] Connecting to:', SOCKET_URL);
+            timeout: 10000,
+          }
+        );
 
-        const socket = io(SOCKET_URL, {
-          transports: ['websocket', 'polling'],
-          reconnection: true,
-        });
-
-        socketRef.current = socket;
+        socketRef.current =
+          socket;
 
         /*
-         * IMPORTANT:
-         * This tells us exactly why Socket.io fails.
-         */
-        socket.on('connect', () => {
-          console.log(
-            '========================================'
-          );
-          console.log(
-            '[Socket] CONNECTED SUCCESSFULLY'
-          );
-          console.log('[Socket] Socket ID:', socket.id);
-          console.log('========================================');
-
-          setConnected(true);
-
-          socket.emit('join-room', {
-            roomCode: roomId,
-            userId,
-            userName,
-          });
-
-          console.log('[Socket] join-room emitted');
-        });
-
-        socket.on('connect_error', (error) => {
-          console.error(
-            '========================================'
-          );
-          console.error('[Socket] CONNECTION ERROR');
-          console.error(error);
-          console.error('Message:', error.message);
-          console.error(
-            '========================================'
-          );
-
-          setConnected(false);
-        });
-
-        socket.on('disconnect', (reason) => {
-          console.log(
-            '[Socket] Disconnected:',
-            reason
-          );
-
-          setConnected(false);
-        });
-
-        /*
-         * 3. ANOTHER USER JOINED
+         * SOCKET CONNECT
          */
         socket.on(
-          'user-connected',
-          async ({ userId: remoteUserId, userName: remoteUserName }) => {
+          'connect',
+          () => {
             console.log(
               '========================================'
             );
+
+            console.log(
+              '[Socket] CONNECTED SUCCESSFULLY'
+            );
+
+            console.log(
+              '[Socket] Socket ID:',
+              socket?.id
+            );
+
+            console.log(
+              '[Socket] Transport:',
+              socket?.io.engine.transport.name
+            );
+
+            console.log(
+              '========================================'
+            );
+
+            setConnected(true);
+
+            socket?.emit(
+              'join-room',
+              {
+                roomCode: roomId,
+                userId,
+                userName,
+              }
+            );
+
+            console.log(
+              '[Socket] join-room emitted'
+            );
+          }
+        );
+
+        /*
+         * SOCKET CONNECTION ERROR
+         */
+        socket.on(
+          'connect_error',
+          (error) => {
+            console.error(
+              '========================================'
+            );
+
+            console.error(
+              '[Socket] CONNECTION ERROR'
+            );
+
+            console.error(
+              '[Socket] Message:',
+              error.message
+            );
+
+            console.error(
+              '[Socket] Error:',
+              error
+            );
+
+            console.error(
+              '========================================'
+            );
+
+            setConnected(false);
+          }
+        );
+
+        /*
+         * SOCKET DISCONNECT
+         */
+        socket.on(
+          'disconnect',
+          (reason) => {
+            console.log(
+              '[Socket] Disconnected:',
+              reason
+            );
+
+            setConnected(false);
+          }
+        );
+
+        /*
+         * ========================================
+         * 2. CAMERA + MICROPHONE
+         * ========================================
+         */
+
+        console.log(
+          '[Media] Requesting camera and microphone...'
+        );
+
+        const stream =
+          await navigator.mediaDevices.getUserMedia(
+            {
+              video: true,
+              audio: true,
+            }
+          );
+
+        if (!mounted) {
+          stream
+            .getTracks()
+            .forEach((track) =>
+              track.stop()
+            );
+
+          socket.disconnect();
+
+          return;
+        }
+
+        console.log(
+          '[Media] Camera and microphone ready'
+        );
+
+        localStreamRef.current =
+          stream;
+
+        if (
+          localVideoRef.current
+        ) {
+          localVideoRef.current.srcObject =
+            stream;
+        }
+
+        /*
+         * ========================================
+         * 3. USER CONNECTED
+         * ========================================
+         */
+
+        socket.on(
+          'user-connected',
+          async ({
+            userId: remoteUserId,
+            userName: remoteUserName,
+          }) => {
+            console.log(
+              '========================================'
+            );
+
             console.log(
               '[Room] ANOTHER USER JOINED'
             );
+
             console.log(
-              'Remote user:',
+              '[Room] Remote user:',
               remoteUserName
             );
+
             console.log(
-              'Remote ID:',
+              '[Room] Remote ID:',
               remoteUserId
             );
+
             console.log(
               '========================================'
             );
@@ -267,24 +458,33 @@ export const Room: React.FC = () => {
             setParticipantsCount(2);
 
             const peerConnection =
-              createPeerConnection(socket);
+              createPeerConnection(
+                socket!
+              );
 
             peerConnectionRef.current =
               peerConnection;
 
-            stream.getTracks().forEach((track) => {
-              console.log(
-                '[WebRTC] Adding local track:',
-                track.kind
-              );
+            /*
+             * ADD CAMERA + MICROPHONE
+             */
+            stream
+              .getTracks()
+              .forEach((track) => {
+                console.log(
+                  '[WebRTC] Adding local track:',
+                  track.kind
+                );
 
-              peerConnection.addTrack(
-                track,
-                stream
-              );
-            });
+                peerConnection.addTrack(
+                  track,
+                  stream
+                );
+              });
 
-            console.log('[WebRTC] Creating offer');
+            console.log(
+              '[WebRTC] Creating offer'
+            );
 
             const offer =
               await peerConnection.createOffer();
@@ -297,25 +497,35 @@ export const Room: React.FC = () => {
               '[WebRTC] Sending offer'
             );
 
-            socket.emit('video-offer', {
-              roomCode: roomId,
-              offer,
-            });
+            socket?.emit(
+              'video-offer',
+              {
+                roomCode: roomId,
+                offer,
+              }
+            );
           }
         );
 
         /*
-         * 4. RECEIVE OFFER
+         * ========================================
+         * 4. RECEIVE VIDEO OFFER
+         * ========================================
          */
+
         socket.on(
           'video-offer-received',
-          async ({ offer }) => {
+          async ({
+            offer,
+          }) => {
             console.log(
               '========================================'
             );
+
             console.log(
               '[WebRTC] VIDEO OFFER RECEIVED'
             );
+
             console.log(
               '========================================'
             );
@@ -323,25 +533,37 @@ export const Room: React.FC = () => {
             setParticipantsCount(2);
 
             const peerConnection =
-              createPeerConnection(socket);
+              createPeerConnection(
+                socket!
+              );
 
             peerConnectionRef.current =
               peerConnection;
 
-            stream.getTracks().forEach((track) => {
-              console.log(
-                '[WebRTC] Adding local track:',
-                track.kind
-              );
+            /*
+             * ADD LOCAL TRACKS
+             */
+            stream
+              .getTracks()
+              .forEach((track) => {
+                console.log(
+                  '[WebRTC] Adding local track:',
+                  track.kind
+                );
 
-              peerConnection.addTrack(
-                track,
-                stream
-              );
-            });
+                peerConnection.addTrack(
+                  track,
+                  stream
+                );
+              });
 
+            /*
+             * SET REMOTE OFFER
+             */
             await peerConnection.setRemoteDescription(
-              new RTCSessionDescription(offer)
+              new RTCSessionDescription(
+                offer
+              )
             );
 
             console.log(
@@ -349,14 +571,17 @@ export const Room: React.FC = () => {
             );
 
             /*
-             * Add queued ICE candidates
+             * ADD QUEUED ICE
              */
             for (
-              const candidate of pendingIceCandidatesRef.current
+              const candidate of
+                pendingIceCandidatesRef.current
             ) {
               try {
                 await peerConnection.addIceCandidate(
-                  new RTCIceCandidate(candidate)
+                  new RTCIceCandidate(
+                    candidate
+                  )
                 );
               } catch (error) {
                 console.error(
@@ -366,8 +591,12 @@ export const Room: React.FC = () => {
               }
             }
 
-            pendingIceCandidatesRef.current = [];
+            pendingIceCandidatesRef.current =
+              [];
 
+            /*
+             * CREATE ANSWER
+             */
             const answer =
               await peerConnection.createAnswer();
 
@@ -379,32 +608,45 @@ export const Room: React.FC = () => {
               '[WebRTC] Sending answer'
             );
 
-            socket.emit('video-answer', {
-              roomCode: roomId,
-              answer,
-            });
+            socket?.emit(
+              'video-answer',
+              {
+                roomCode: roomId,
+                answer,
+              }
+            );
           }
         );
 
         /*
-         * 5. RECEIVE ANSWER
+         * ========================================
+         * 5. RECEIVE VIDEO ANSWER
+         * ========================================
          */
+
         socket.on(
           'video-answer-received',
-          async ({ answer }) => {
+          async ({
+            answer,
+          }) => {
             console.log(
               '[WebRTC] VIDEO ANSWER RECEIVED'
             );
 
-            if (!peerConnectionRef.current) {
+            if (
+              !peerConnectionRef.current
+            ) {
               console.error(
                 '[WebRTC] No peer connection for answer'
               );
+
               return;
             }
 
             await peerConnectionRef.current.setRemoteDescription(
-              new RTCSessionDescription(answer)
+              new RTCSessionDescription(
+                answer
+              )
             );
 
             console.log(
@@ -412,14 +654,17 @@ export const Room: React.FC = () => {
             );
 
             /*
-             * Add queued ICE candidates
+             * ADD QUEUED ICE
              */
             for (
-              const candidate of pendingIceCandidatesRef.current
+              const candidate of
+                pendingIceCandidatesRef.current
             ) {
               try {
                 await peerConnectionRef.current.addIceCandidate(
-                  new RTCIceCandidate(candidate)
+                  new RTCIceCandidate(
+                    candidate
+                  )
                 );
               } catch (error) {
                 console.error(
@@ -429,21 +674,29 @@ export const Room: React.FC = () => {
               }
             }
 
-            pendingIceCandidatesRef.current = [];
+            pendingIceCandidatesRef.current =
+              [];
           }
         );
 
         /*
+         * ========================================
          * 6. ICE CANDIDATES
+         * ========================================
          */
+
         socket.on(
           'ice-candidate-received',
-          async ({ candidate }) => {
+          async ({
+            candidate,
+          }) => {
             console.log(
               '[WebRTC] ICE candidate received'
             );
 
-            if (!candidate) return;
+            if (!candidate) {
+              return;
+            }
 
             const peerConnection =
               peerConnectionRef.current;
@@ -465,7 +718,9 @@ export const Room: React.FC = () => {
 
             try {
               await peerConnection.addIceCandidate(
-                new RTCIceCandidate(candidate)
+                new RTCIceCandidate(
+                  candidate
+                )
               );
 
               console.log(
@@ -481,303 +736,492 @@ export const Room: React.FC = () => {
         );
 
         /*
+         * ========================================
          * 7. CHAT
+         * ========================================
          */
+
         socket.on(
           'receive-message',
-          (message: ChatMessage) => {
+          (
+            message: ChatMessage
+          ) => {
             console.log(
               '[Chat] Message received:',
               message
             );
 
-            setMessages((previous) => [
-              ...previous,
-              message,
-            ]);
+            setMessages(
+              (previous) => [
+                ...previous,
+                message,
+              ]
+            );
           }
         );
+
       } catch (error) {
         console.error(
-          '[Room] Room initialization failed:',
+          '========================================'
+        );
+
+        console.error(
+          '[Room] ROOM INITIALIZATION FAILED'
+        );
+
+        console.error(
           error
         );
+
+        console.error(
+          '========================================'
+        );
+
+        if (socket) {
+          socket.disconnect();
+        }
       }
     };
 
     startRoom();
 
+    /*
+     * CLEANUP
+     */
     return () => {
       mounted = false;
 
-      console.log('[Room] Cleaning up');
+      console.log(
+        '[Room] Cleaning up'
+      );
 
-      if (socketRef.current) {
+      if (
+        socketRef.current
+      ) {
         socketRef.current.disconnect();
+
+        socketRef.current =
+          null;
       }
 
-      if (peerConnectionRef.current) {
+      if (
+        peerConnectionRef.current
+      ) {
         peerConnectionRef.current.close();
+
+        peerConnectionRef.current =
+          null;
       }
 
-      if (localStreamRef.current) {
+      if (
+        localStreamRef.current
+      ) {
         localStreamRef.current
           .getTracks()
-          .forEach((track) => track.stop());
+          .forEach((track) =>
+            track.stop()
+          );
+
+        localStreamRef.current =
+          null;
       }
     };
-  }, [roomId, userId, userName]);
+
+  }, [
+    roomId,
+    userId,
+    userName,
+  ]);
 
   /*
+   * ========================================
    * MICROPHONE
+   * ========================================
    */
+
   const toggleAudio = () => {
-    const stream = localStreamRef.current;
+    const stream =
+      localStreamRef.current;
 
-    if (!stream) return;
-
-    stream.getAudioTracks().forEach((track) => {
-      track.enabled = !track.enabled;
-    });
-
-    setIsAudioMuted((previous) => !previous);
-  };
-
-  /*
-   * CAMERA
-   */
-  const toggleVideo = () => {
-    const stream = localStreamRef.current;
-
-    if (!stream) return;
-
-    stream.getVideoTracks().forEach((track) => {
-      track.enabled = !track.enabled;
-    });
-
-    setIsVideoStopped((previous) => !previous);
-  };
-
-  /*
-   * SCREEN SHARE
-   */
-  const toggleScreenShare = async () => {
-    if (!peerConnectionRef.current) {
-      alert('Connect another participant first.');
+    if (!stream) {
       return;
     }
 
-    try {
-      if (!isScreenSharing) {
-        const screenStream =
-          await navigator.mediaDevices.getDisplayMedia({
-            video: true,
-          });
+    stream
+      .getAudioTracks()
+      .forEach((track) => {
+        track.enabled =
+          !track.enabled;
+      });
 
-        const screenTrack =
-          screenStream.getVideoTracks()[0];
+    setIsAudioMuted(
+      (previous) =>
+        !previous
+    );
+  };
 
-        const sender =
-          peerConnectionRef.current
-            .getSenders()
-            .find(
-              (item) =>
-                item.track?.kind === 'video'
+  /*
+   * ========================================
+   * CAMERA
+   * ========================================
+   */
+
+  const toggleVideo = () => {
+    const stream =
+      localStreamRef.current;
+
+    if (!stream) {
+      return;
+    }
+
+    stream
+      .getVideoTracks()
+      .forEach((track) => {
+        track.enabled =
+          !track.enabled;
+      });
+
+    setIsVideoStopped(
+      (previous) =>
+        !previous
+    );
+  };
+
+  /*
+   * ========================================
+   * SCREEN SHARE
+   * ========================================
+   */
+
+  const toggleScreenShare =
+    async () => {
+      if (
+        !peerConnectionRef.current
+      ) {
+        alert(
+          'Connect another participant first.'
+        );
+
+        return;
+      }
+
+      try {
+        if (
+          !isScreenSharing
+        ) {
+          const screenStream =
+            await navigator.mediaDevices.getDisplayMedia(
+              {
+                video: true,
+              }
             );
 
-        if (sender) {
-          await sender.replaceTrack(screenTrack);
-        }
+          const screenTrack =
+            screenStream.getVideoTracks()[0];
 
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject =
-            screenStream;
-        }
+          const sender =
+            peerConnectionRef.current
+              .getSenders()
+              .find(
+                (item) =>
+                  item.track?.kind ===
+                  'video'
+              );
 
-        screenTrack.onended = async () => {
+          if (sender) {
+            await sender.replaceTrack(
+              screenTrack
+            );
+          }
+
+          if (
+            localVideoRef.current
+          ) {
+            localVideoRef.current.srcObject =
+              screenStream;
+          }
+
+          screenTrack.onended =
+            async () => {
+              const cameraTrack =
+                localStreamRef.current?.getVideoTracks()[0];
+
+              if (
+                cameraTrack &&
+                sender
+              ) {
+                await sender.replaceTrack(
+                  cameraTrack
+                );
+              }
+
+              if (
+                localVideoRef.current
+              ) {
+                localVideoRef.current.srcObject =
+                  localStreamRef.current;
+              }
+
+              setIsScreenSharing(
+                false
+              );
+            };
+
+          setIsScreenSharing(
+            true
+          );
+
+        } else {
           const cameraTrack =
             localStreamRef.current?.getVideoTracks()[0];
 
-          if (cameraTrack && sender) {
-            await sender.replaceTrack(cameraTrack);
+          const sender =
+            peerConnectionRef.current
+              .getSenders()
+              .find(
+                (item) =>
+                  item.track?.kind ===
+                  'video'
+              );
+
+          if (
+            sender &&
+            cameraTrack
+          ) {
+            await sender.replaceTrack(
+              cameraTrack
+            );
           }
 
-          if (localVideoRef.current) {
+          if (
+            localVideoRef.current
+          ) {
             localVideoRef.current.srcObject =
               localStreamRef.current;
           }
 
-          setIsScreenSharing(false);
-        };
-
-        setIsScreenSharing(true);
-      } else {
-        const cameraTrack =
-          localStreamRef.current?.getVideoTracks()[0];
-
-        const sender =
-          peerConnectionRef.current
-            .getSenders()
-            .find(
-              (item) =>
-                item.track?.kind === 'video'
-            );
-
-        if (sender && cameraTrack) {
-          await sender.replaceTrack(cameraTrack);
+          setIsScreenSharing(
+            false
+          );
         }
 
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject =
-            localStreamRef.current;
-        }
-
-        setIsScreenSharing(false);
+      } catch (error) {
+        console.error(
+          '[ScreenShare] Failed:',
+          error
+        );
       }
-    } catch (error) {
-      console.error(
-        '[ScreenShare] Failed:',
-        error
-      );
-    }
-  };
+    };
 
   /*
+   * ========================================
    * SEND CHAT
+   * ========================================
    */
+
   const sendMessage = (
     event: React.FormEvent
   ) => {
     event.preventDefault();
 
-    if (!messageText.trim()) return;
-
-    if (!socketRef.current || !roomId) {
-      console.error(
-        '[Chat] Socket is not connected'
-      );
+    if (
+      !messageText.trim()
+    ) {
       return;
     }
 
-    const text = messageText.trim();
+    if (
+      !socketRef.current ||
+      !roomId
+    ) {
+      console.error(
+        '[Chat] Socket is not connected'
+      );
 
-    const message: ChatMessage = {
+      return;
+    }
+
+    const text =
+      messageText.trim();
+
+    const message:
+      ChatMessage = {
       senderId: userId,
       senderName: userName,
       messageText: text,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      timestamp:
+        new Date().toLocaleTimeString(
+          [],
+          {
+            hour: '2-digit',
+            minute: '2-digit',
+          }
+        ),
     };
 
-    setMessages((previous) => [
-      ...previous,
-      message,
-    ]);
+    setMessages(
+      (previous) => [
+        ...previous,
+        message,
+      ]
+    );
 
-    socketRef.current.emit('send-message', {
-      roomCode: roomId,
-      senderId: userId,
-      senderName: userName,
-      messageText: text,
-    });
+    socketRef.current.emit(
+      'send-message',
+      {
+        roomCode: roomId,
+        senderId: userId,
+        senderName: userName,
+        messageText: text,
+      }
+    );
 
     setMessageText('');
   };
 
   /*
+   * ========================================
    * AI SUMMARY
+   * ========================================
    */
-  const generateSummary = async () => {
-    if (messages.length === 0) {
-      alert(
-        'There are no chat messages to summarize yet.'
-      );
-      return;
-    }
 
-    setSummaryLoading(true);
-    setShowSummary(true);
-
-    try {
-      const chatText = messages
-        .map(
-          (message) =>
-            `${message.senderName}: ${message.messageText}`
-        )
-        .join('\n');
-
-      const response = await fetch(
-        `${SOCKET_URL}/api/meetings/summary`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            roomCode: roomId,
-            messages: chatText,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || 'Summary failed'
+  const generateSummary =
+    async () => {
+      if (
+        messages.length === 0
+      ) {
+        alert(
+          'There are no chat messages to summarize yet.'
         );
+
+        return;
       }
 
-      setSummary(data.summary);
-    } catch (error) {
-      console.error(
-        '[AI Summary] Error:',
-        error
+      setSummaryLoading(
+        true
       );
 
-      setSummary(
-        'AI summary is currently unavailable. The AI summary API still needs to be configured on the backend.'
+      setShowSummary(
+        true
       );
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
+
+      try {
+        const chatText =
+          messages
+            .map(
+              (message) =>
+                `${message.senderName}: ${message.messageText}`
+            )
+            .join('\n');
+
+        const response =
+          await fetch(
+            `${SOCKET_URL}/api/meetings/summary`,
+            {
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/json',
+              },
+
+              body: JSON.stringify({
+                roomCode: roomId,
+                messages:
+                  chatText,
+              }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              'Summary failed'
+          );
+        }
+
+        setSummary(
+          data.summary
+        );
+
+      } catch (error) {
+        console.error(
+          '[AI Summary] Error:',
+          error
+        );
+
+        setSummary(
+          'AI summary is currently unavailable. The AI summary API still needs to be configured on the backend.'
+        );
+
+      } finally {
+        setSummaryLoading(
+          false
+        );
+      }
+    };
 
   /*
-   * LEAVE
+   * ========================================
+   * LEAVE MEETING
+   * ========================================
    */
-  const handleDisconnect = () => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
 
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-    }
+  const handleDisconnect =
+    () => {
+      if (
+        socketRef.current
+      ) {
+        socketRef.current.disconnect();
+      }
 
-    if (localStreamRef.current) {
-      localStreamRef.current
-        .getTracks()
-        .forEach((track) => track.stop());
-    }
+      if (
+        peerConnectionRef.current
+      ) {
+        peerConnectionRef.current.close();
+      }
 
-    navigate('/dashboard');
-  };
+      if (
+        localStreamRef.current
+      ) {
+        localStreamRef.current
+          .getTracks()
+          .forEach((track) =>
+            track.stop()
+          );
+      }
+
+      navigate(
+        '/dashboard'
+      );
+    };
+
+  /*
+   * ========================================
+   * UI
+   * ========================================
+   */
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-200 flex flex-col">
 
+      {/* HEADER */}
+
       <header className="border-b border-white/[0.06] bg-black/30 backdrop-blur-xl px-5 py-4">
+
         <div className="flex items-center justify-between">
 
           <div className="flex items-center gap-3">
+
             <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-3 py-1.5 rounded-xl text-xs font-bold text-white">
               LIVE
             </div>
 
             <div>
+
               <p className="text-sm font-bold text-white">
                 IntellMeet
               </p>
@@ -785,12 +1229,17 @@ export const Room: React.FC = () => {
               <p className="text-[10px] text-slate-500 font-mono">
                 ROOM: {roomId}
               </p>
+
             </div>
+
           </div>
 
           <div className="flex items-center gap-3">
 
+            {/* CONNECTION STATUS */}
+
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+
               <span
                 className={`w-2 h-2 rounded-full ${
                   connected
@@ -800,23 +1249,34 @@ export const Room: React.FC = () => {
               />
 
               <span className="text-xs text-slate-400">
+
                 {connected
                   ? 'Connected'
                   : 'Connecting...'}
+
               </span>
+
             </div>
 
+            {/* PARTICIPANTS */}
+
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+
               <Users className="w-4 h-4 text-indigo-400" />
 
               <span className="text-xs text-slate-300">
                 {participantsCount}
               </span>
+
             </div>
 
           </div>
+
         </div>
+
       </header>
+
+      {/* MAIN */}
 
       <main className="flex-1 p-5">
 
@@ -828,12 +1288,18 @@ export const Room: React.FC = () => {
           }`}
         >
 
+          {/* VIDEO AREA */}
+
           <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            {/* LOCAL VIDEO */}
 
             <div className="relative bg-black rounded-3xl overflow-hidden border border-white/[0.08] min-h-[300px]">
 
               <video
-                ref={localVideoRef}
+                ref={
+                  localVideoRef
+                }
                 autoPlay
                 muted
                 playsInline
@@ -846,25 +1312,38 @@ export const Room: React.FC = () => {
 
               {isVideoStopped && (
                 <div className="absolute inset-0 bg-slate-950 flex items-center justify-center">
+
                   <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
-                    {userName.slice(0, 2)}
+
+                    {userName.slice(
+                      0,
+                      2
+                    )}
+
                   </div>
+
                 </div>
               )}
 
             </div>
 
+            {/* REMOTE VIDEO */}
+
             <div className="relative bg-[#0b0e16] rounded-3xl overflow-hidden border border-white/[0.08] min-h-[300px]">
 
               <video
-                ref={remoteVideoRef}
+                ref={
+                  remoteVideoRef
+                }
                 autoPlay
                 playsInline
                 className="w-full h-full object-cover"
               />
 
-              {participantsCount === 1 && (
+              {participantsCount ===
+                1 && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+
                   <Users className="w-12 h-12 text-slate-700 mb-4" />
 
                   <p className="text-sm text-slate-400">
@@ -874,6 +1353,7 @@ export const Room: React.FC = () => {
                   <p className="text-xs text-slate-600 mt-2">
                     Share the meeting code with your teammate.
                   </p>
+
                 </div>
               )}
 
@@ -885,69 +1365,103 @@ export const Room: React.FC = () => {
 
           </section>
 
+          {/* CHAT */}
+
           {showChat && (
             <aside className="bg-[#0c1019] border border-white/[0.07] rounded-3xl overflow-hidden flex flex-col min-h-[500px]">
 
               <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
+
                 <div className="flex items-center gap-2">
+
                   <MessageCircle className="w-5 h-5 text-indigo-400" />
 
                   <span className="font-bold text-white">
                     Meeting Chat
                   </span>
+
                 </div>
 
                 <button
-                  onClick={() => setShowChat(false)}
+                  onClick={() =>
+                    setShowChat(
+                      false
+                    )
+                  }
                   className="text-slate-500 hover:text-white"
                 >
                   ×
                 </button>
+
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
 
-                {messages.length === 0 && (
+                {messages.length ===
+                  0 && (
                   <div className="text-center text-xs text-slate-600 mt-10">
                     No messages yet.
                   </div>
                 )}
 
-                {messages.map((message, index) => (
-                  <div
-                    key={`${message.timestamp}-${index}`}
-                    className={`p-3 rounded-2xl ${
-                      message.senderId === userId
-                        ? 'bg-indigo-600/20 ml-5'
-                        : 'bg-white/[0.04] mr-5'
-                    }`}
-                  >
-                    <div className="flex justify-between gap-2">
-                      <span className="text-xs font-bold text-indigo-300">
-                        {message.senderName}
-                      </span>
+                {messages.map(
+                  (
+                    message,
+                    index
+                  ) => (
+                    <div
+                      key={`${message.timestamp}-${index}`}
+                      className={`p-3 rounded-2xl ${
+                        message.senderId ===
+                        userId
+                          ? 'bg-indigo-600/20 ml-5'
+                          : 'bg-white/[0.04] mr-5'
+                      }`}
+                    >
 
-                      <span className="text-[9px] text-slate-600">
-                        {message.timestamp}
-                      </span>
+                      <div className="flex justify-between gap-2">
+
+                        <span className="text-xs font-bold text-indigo-300">
+                          {
+                            message.senderName
+                          }
+                        </span>
+
+                        <span className="text-[9px] text-slate-600">
+                          {
+                            message.timestamp
+                          }
+                        </span>
+
+                      </div>
+
+                      <p className="text-sm text-slate-300 mt-1">
+                        {
+                          message.messageText
+                        }
+                      </p>
+
                     </div>
-
-                    <p className="text-sm text-slate-300 mt-1">
-                      {message.messageText}
-                    </p>
-                  </div>
-                ))}
+                  )
+                )}
 
               </div>
 
               <form
-                onSubmit={sendMessage}
+                onSubmit={
+                  sendMessage
+                }
                 className="p-3 border-t border-white/[0.06] flex gap-2"
               >
+
                 <input
-                  value={messageText}
+                  value={
+                    messageText
+                  }
                   onChange={(e) =>
-                    setMessageText(e.target.value)
+                    setMessageText(
+                      e.target.value
+                    )
                   }
                   placeholder="Type a message..."
                   className="flex-1 bg-black/30 border border-white/[0.08] rounded-xl px-3 py-3 text-sm text-white outline-none focus:border-indigo-500/50"
@@ -959,13 +1473,17 @@ export const Room: React.FC = () => {
                 >
                   <Send className="w-4 h-4" />
                 </button>
+
               </form>
 
             </aside>
           )}
 
         </div>
+
       </main>
+
+      {/* AI SUMMARY */}
 
       {showSummary && (
         <div className="fixed right-5 bottom-24 w-[min(420px,calc(100%-40px))] bg-[#0c1019] border border-indigo-500/20 rounded-3xl shadow-2xl z-50">
@@ -973,15 +1491,21 @@ export const Room: React.FC = () => {
           <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
 
             <div className="flex items-center gap-2">
+
               <Sparkles className="w-5 h-5 text-indigo-400" />
 
               <span className="font-bold text-white">
                 AI Meeting Summary
               </span>
+
             </div>
 
             <button
-              onClick={() => setShowSummary(false)}
+              onClick={() =>
+                setShowSummary(
+                  false
+                )
+              }
               className="text-slate-500 hover:text-white"
             >
               ×
@@ -993,8 +1517,11 @@ export const Room: React.FC = () => {
 
             {summaryLoading ? (
               <div className="flex items-center gap-3 text-slate-400">
+
                 <Loader2 className="w-5 h-5 animate-spin" />
+
                 Generating summary...
+
               </div>
             ) : (
               <p className="text-sm text-slate-300 leading-7 whitespace-pre-wrap">
@@ -1003,57 +1530,83 @@ export const Room: React.FC = () => {
             )}
 
           </div>
+
         </div>
       )}
+
+      {/* FOOTER CONTROLS */}
 
       <footer className="border-t border-white/[0.06] bg-black/30 backdrop-blur-xl p-4">
 
         <div className="flex justify-center items-center gap-3">
 
+          {/* MIC */}
+
           <button
-            onClick={toggleAudio}
+            onClick={
+              toggleAudio
+            }
             className={`p-4 rounded-2xl border ${
               isAudioMuted
                 ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
                 : 'bg-white/[0.04] border-white/[0.08] text-white'
             }`}
           >
+
             {isAudioMuted ? (
               <MicOff className="w-5 h-5" />
             ) : (
               <Mic className="w-5 h-5" />
             )}
+
           </button>
 
+          {/* CAMERA */}
+
           <button
-            onClick={toggleVideo}
+            onClick={
+              toggleVideo
+            }
             className={`p-4 rounded-2xl border ${
               isVideoStopped
                 ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
                 : 'bg-white/[0.04] border-white/[0.08] text-white'
             }`}
           >
+
             {isVideoStopped ? (
               <VideoOff className="w-5 h-5" />
             ) : (
               <Video className="w-5 h-5" />
             )}
+
           </button>
 
+          {/* SCREEN SHARE */}
+
           <button
-            onClick={toggleScreenShare}
+            onClick={
+              toggleScreenShare
+            }
             className={`p-4 rounded-2xl border ${
               isScreenSharing
                 ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
                 : 'bg-white/[0.04] border-white/[0.08] text-white'
             }`}
           >
+
             <ScreenShare className="w-5 h-5" />
+
           </button>
+
+          {/* CHAT */}
 
           <button
             onClick={() =>
-              setShowChat((previous) => !previous)
+              setShowChat(
+                (previous) =>
+                  !previous
+              )
             }
             className={`p-4 rounded-2xl border ${
               showChat
@@ -1061,25 +1614,40 @@ export const Room: React.FC = () => {
                 : 'bg-white/[0.04] border-white/[0.08] text-white'
             }`}
           >
+
             <MessageCircle className="w-5 h-5" />
+
           </button>
 
+          {/* AI SUMMARY */}
+
           <button
-            onClick={generateSummary}
+            onClick={
+              generateSummary
+            }
             className="p-4 rounded-2xl border bg-purple-500/10 border-purple-500/20 text-purple-300"
             title="Generate AI Summary"
           >
+
             <Sparkles className="w-5 h-5" />
+
           </button>
 
+          {/* LEAVE */}
+
           <button
-            onClick={handleDisconnect}
+            onClick={
+              handleDisconnect
+            }
             className="p-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white"
           >
+
             <PhoneOff className="w-5 h-5" />
+
           </button>
 
         </div>
+
       </footer>
 
     </div>
@@ -1087,3 +1655,4 @@ export const Room: React.FC = () => {
 };
 
 export default Room;
+```
