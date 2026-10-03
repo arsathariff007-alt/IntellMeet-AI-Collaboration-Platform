@@ -17,9 +17,10 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
-const API_URL =
+const API_URL = (
   import.meta.env.VITE_API_URL ||
-  'https://intellmeet-ai-collaboration-platform-1.onrender.com';
+  'https://intellmeet-ai-collaboration-platform-1.onrender.com'
+).replace(/\/+$/, '');
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
