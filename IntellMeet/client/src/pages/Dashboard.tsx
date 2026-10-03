@@ -21,7 +21,7 @@ export const Dashboard: React.FC = () => {
 
     try {
       // Replaced hardcoded address string with your active environment configuration variable path
-      const response = await fetch(`${API_URL}/api/meetings/create`, {
+      const response = await fetch(`https://intellmeet-ai-collaboration-platform-1.onrender.com/api/meetings/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
