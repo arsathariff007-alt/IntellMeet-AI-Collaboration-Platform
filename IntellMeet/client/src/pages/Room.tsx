@@ -39,7 +39,7 @@ export const MediaControlsDock: React.FC<{ localStream: MediaStream | null; onDi
         }`}
         title={isAudioMuted ? "Unmute Audio Microphone" : "Mute Audio Microphone"}
       >
-        {isAudioMuted ? <MicOff className="w-5 h-5 animate-shake" /> : <Mic, className="w-5 h-5" />}
+        {isAudioMuted ? <MicOff className="w-5 h-5 animate-shake" /> : <Mic className="w-5 h-5" />}
       </button>
 
       {/* Video Camera Lens Frame Feeds Action Toggle Control */}
