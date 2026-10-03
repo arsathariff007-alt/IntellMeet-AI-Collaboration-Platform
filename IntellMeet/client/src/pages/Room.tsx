@@ -56,7 +56,7 @@ export const Room: React.FC = () => {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
-  const userId = user?._id || user?.id || 'anonymous-user';
+  const userId = user?._id || '';
   const userName = user?.name || 'User';
 
   useEffect(() => {
