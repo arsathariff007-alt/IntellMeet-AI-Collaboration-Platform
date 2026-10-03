@@ -24,6 +24,13 @@ app.use(helmet({
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.get("/api/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "IntellMeet backend routing is working",
+    route: "/api/test",
+  });
+});
 app.use("/api/meetings", meetingRoutes);
 
 app.get("/", (req, res) => {
