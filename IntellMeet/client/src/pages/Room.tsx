@@ -1071,4 +1071,5 @@ const Room: React.FC = () => {
   );
 };
 
+export { Room };
 export default Room;
