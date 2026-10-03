@@ -29,6 +29,7 @@ interface ChatMessage {
 }
 
 const Room: React.FC = () => {
+  console.log("🔥 ROOM COMPONENT IS RUNNING 🔥");
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
