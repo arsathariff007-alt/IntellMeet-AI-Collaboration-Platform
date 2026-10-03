@@ -17,7 +17,7 @@ export const Register: React.FC = () => {
 
     try {
       // ✅ CORRECTED PATH: Hits the complete API registration path explicitly with no missing routes
-      const response = await fetch('https://intellmeet-ai-collaboration-platform-1.onrender.com', {
+      const response = await fetch('https://onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
