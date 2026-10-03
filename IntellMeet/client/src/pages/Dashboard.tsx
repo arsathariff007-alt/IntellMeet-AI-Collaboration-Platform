@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import { Video, PlusCircle, LogOut, Keyboard, ArrowRight, Loader2, Sparkles, Radio } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Video,
+  PlusCircle,
+  LogOut,
+  Keyboard,
+  ArrowRight,
+  Loader2,
+  Sparkles,
+  Radio,
+  ShieldCheck,
+  Zap,
+  Users,
+  Clock3,
+  Activity,
+} from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://intellmeet-ai-collaboration-platform-1.onrender.com';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://intellmeet-ai-collaboration-platform-1.onrender.com';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, accessToken, logout } = useAuthStore();
+
   const [meetingTitle, setMeetingTitle] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleCreateMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!meetingTitle.trim()) return;
+
     setLoading(true);
 
     try {
@@ -22,20 +41,22 @@ export const Dashboard: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ title: meetingTitle }),
+        body: JSON.stringify({
+          title: meetingTitle.trim(),
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to allocate room');
+        throw new Error(data.message || 'Failed to create meeting');
       }
 
       navigate(`/room/${data.meeting.meetingCode}`);
     } catch (err: any) {
-      alert(err.message || 'Server error generating room');
+      alert(err.message || 'Server error while creating meeting');
     } finally {
       setLoading(false);
     }
@@ -43,126 +64,444 @@ export const Dashboard: React.FC = () => {
 
   const handleJoinMeeting = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!joinCode.trim()) return;
+
     navigate(`/room/${joinCode.trim().toLowerCase()}`);
   };
 
-  return (
-    <div className="min-h-screen bg-[#0b0f19] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/30 via-[#0b0f19] to-[#05070c] text-slate-200 antialiased relative overflow-hidden">
-      {/* Background Ambient Glow Orbs */}
-      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[150px] pointer-events-none" />
+  const displayName = user?.name || 'User';
 
-      {/* Cyber Top Navigation Tray */}
-      <nav className="bg-white/[0.01] backdrop-blur-xl border-b border-white/[0.06] px-8 py-4 flex items-center justify-between relative z-20">
-        <div className="flex items-center gap-3 font-extrabold text-white text-xl tracking-tight">
-          <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-[0_0_15px_rgba(79,70,229,0.3)]">
-            <Video className="w-5 h-5" />
-          </div>
-          <span className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">IntellMeet <span className="text-indigo-400 text-sm font-semibold tracking-widest uppercase ml-1">HQ</span></span>
-        </div>
-        
-        <div className="flex items-center gap-5">
-          {/* User Profile Glass Badge */}
-          <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] px-4 py-2 rounded-2xl backdrop-blur-md">
-            <div className="w-7 h-7 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-full flex items-center justify-center text-xs font-black uppercase shadow-[0_0_10px_rgba(99,102,241,0.4)]">
-              {user?.name ? user.name.slice(0, 2) : 'US'}
+  return (
+    <div className="min-h-screen bg-[#060812] text-slate-200 relative overflow-hidden">
+      {/* =========================================================
+          BACKGROUND EFFECTS
+      ========================================================== */}
+
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-64 -left-64 w-[700px] h-[700px] rounded-full bg-indigo-600/10 blur-[150px]" />
+
+        <div className="absolute top-[30%] -right-64 w-[650px] h-[650px] rounded-full bg-purple-600/10 blur-[160px]" />
+
+        <div className="absolute bottom-[-300px] left-[25%] w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-[150px]" />
+
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+          }}
+        />
+      </div>
+
+      {/* =========================================================
+          NAVIGATION
+      ========================================================== */}
+
+      <nav className="relative z-30 border-b border-white/[0.07] bg-black/20 backdrop-blur-2xl">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4">
+          <div className="flex items-center justify-between">
+
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-indigo-500/40 blur-xl rounded-2xl" />
+
+                <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 border border-white/10">
+                  <Video className="w-5 h-5 text-white" />
+                </div>
+              </div>
+
+              <div>
+                <div className="text-white font-black tracking-tight text-lg">
+                  IntellMeet
+                  <span className="text-indigo-400 ml-1">HQ</span>
+                </div>
+
+                <div className="text-[9px] uppercase tracking-[0.3em] text-slate-500 font-bold">
+                  AI Collaboration
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-bold text-white tracking-wide">{user?.name}</span>
-              <span className="text-[9px] text-indigo-400 font-extrabold tracking-widest uppercase flex items-center gap-1">
-                <Radio className="w-2 h-2 animate-pulse text-emerald-400 fill-emerald-400" /> Secure Node
-              </span>
+
+            {/* Right navigation */}
+            <div className="flex items-center gap-3 sm:gap-5">
+
+              {/* Connection indicator */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/10">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                  System Online
+                </span>
+              </div>
+
+              {/* User */}
+              <div className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white/[0.035] border border-white/[0.07]">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-black text-white uppercase shadow-lg shadow-indigo-500/20">
+                  {displayName.slice(0, 2)}
+                </div>
+
+                <div className="hidden sm:block">
+                  <p className="text-xs font-bold text-white">
+                    {displayName}
+                  </p>
+
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest">
+                    Authorized User
+                  </p>
+                </div>
+              </div>
+
+              {/* Logout */}
+              <button
+                onClick={logout}
+                className="group flex items-center gap-2 px-3 py-2.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/[0.07] border border-transparent hover:border-rose-500/10 transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+
+                <span className="hidden sm:inline text-xs font-semibold">
+                  Sign Out
+                </span>
+              </button>
             </div>
           </div>
-          
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 text-xs text-rose-400 font-semibold hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </button>
         </div>
       </nav>
 
-      {/* Main Dashboard Control Matrix Grid */}
-      <main className="max-w-5xl mx-auto px-6 py-20 relative z-10">
-        
-        {/* Welcome Text Section */}
-        <div className="text-center md:text-left mb-12">
-          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent flex items-center justify-center md:justify-start gap-2">
-            Welcome back, Comms Commander <Sparkles className="w-6 h-6 text-indigo-400 fill-indigo-400/20" />
-          </h1>
-          <p className="text-slate-400 text-sm mt-2">Initialize encryption nodes or bridge instantly into existing signal tracks</p>
-        </div>
+      {/* =========================================================
+          MAIN CONTENT
+      ========================================================== */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Card 1: Allocate Channel Box */}
-          <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] rounded-3xl p-8 flex flex-col justify-between shadow-[0_4px_30px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.03] group relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/20 transition-all" />
+      <main className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+
+        {/* Hero */}
+        <section className="mb-10">
+
+          <div className="flex items-center gap-2 mb-5">
+            <div className="h-px w-8 bg-indigo-500/60" />
+
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">
+              Command Center
+            </span>
+
+            <div className="h-px w-8 bg-indigo-500/60" />
+          </div>
+
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+
             <div>
-              <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
-                <PlusCircle className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 tracking-wide">Initialize Channel Node</h3>
-              <p className="text-slate-400 text-xs leading-relaxed mb-8 font-medium">
-                Generate a multi-peer 9-character communication layer bound to your database cluster instantly.
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-[-0.04em] leading-tight">
+                <span className="text-white">Welcome back,</span>
+                <br />
+
+                <span className="bg-gradient-to-r from-indigo-300 via-white to-purple-300 bg-clip-text text-transparent">
+                  {displayName}
+                </span>
+
+                <Sparkles className="inline-block w-7 h-7 sm:w-9 sm:h-9 ml-3 text-indigo-400 align-middle" />
+              </h1>
+
+              <p className="mt-4 text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
+                Create a secure meeting room, join an existing session,
+                and collaborate with your team in real time.
               </p>
-              
-              <form onSubmit={handleCreateMeeting} className="space-y-4">
-                <input
-                  type="text"
-                  required
-                  value={meetingTitle}
-                  onChange={(e) => setMeetingTitle(e.target.value)}
-                  placeholder="Enter meeting channel topic (e.g., Core Sync)"
-                  className="w-full px-4 py-3.5 bg-black/20 border border-white/[0.06] rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white/[0.04] focus:ring-1 focus:ring-indigo-500/30 text-xs transition-all duration-200 text-white placeholder-slate-600 font-medium"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer shadow-[0_4px_20px_rgba(79,70,229,0.2)] flex items-center justify-center gap-2"
+            </div>
+
+            {/* Status card */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.025] border border-white/[0.07] backdrop-blur-xl">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/10 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-indigo-400" />
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
+                  Workspace
+                </p>
+
+                <p className="text-xs text-white font-bold">
+                  Ready for collaboration
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================
+            FEATURE CARDS
+        ========================================================== */}
+
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* =====================================================
+              CREATE MEETING
+          ====================================================== */}
+
+          <div className="group relative">
+
+            {/* Glow */}
+            <div className="absolute -inset-px rounded-[28px] bg-gradient-to-br from-indigo-500/20 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 blur-sm transition duration-500" />
+
+            <div className="relative h-full rounded-[28px] bg-[#0c101d]/90 backdrop-blur-2xl border border-white/[0.07] overflow-hidden transition-all duration-300 group-hover:border-indigo-500/20">
+
+              {/* Decorative glow */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-indigo-600/10 blur-[70px] pointer-events-none" />
+
+              <div className="relative p-7 sm:p-8">
+
+                {/* Icon */}
+                <div className="flex items-start justify-between mb-7">
+
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center shadow-lg shadow-indigo-500/5">
+                    <PlusCircle className="w-7 h-7 text-indigo-400" />
+                  </div>
+
+                  <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/10 text-[9px] text-indigo-400 font-black uppercase tracking-widest">
+                    Create
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                  Create a Meeting
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-500 leading-relaxed max-w-md">
+                  Start a new collaborative session and generate a unique
+                  meeting code for your team.
+                </p>
+
+                {/* Form */}
+                <form
+                  onSubmit={handleCreateMeeting}
+                  className="mt-8 space-y-4"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Allocating Cryptic Room...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Generate Call Link</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </form>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest font-black text-slate-500 mb-2">
+                      Meeting Topic
+                    </label>
+
+                    <input
+                      type="text"
+                      required
+                      value={meetingTitle}
+                      onChange={(e) => setMeetingTitle(e.target.value)}
+                      placeholder="e.g. Product Strategy Meeting"
+                      className="w-full px-4 py-4 bg-black/30 border border-white/[0.07] rounded-2xl outline-none text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="relative w-full overflow-hidden py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm shadow-xl shadow-indigo-600/15 transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Creating Meeting...
+                      </>
+                    ) : (
+                      <>
+                        Launch Meeting
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Features */}
+                <div className="grid grid-cols-3 gap-2 mt-6">
+
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <Video className="w-4 h-4 text-indigo-400 mb-2" />
+                    <p className="text-[9px] text-slate-500 font-bold">
+                      Video
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <Users className="w-4 h-4 text-indigo-400 mb-2" />
+                    <p className="text-[9px] text-slate-500 font-bold">
+                      Team
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <ShieldCheck className="w-4 h-4 text-indigo-400 mb-2" />
+                    <p className="text-[9px] text-slate-500 font-bold">
+                      Secure
+                    </p>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Card 2: Intercept Existing Code Box */}
-          <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] rounded-3xl p-8 flex flex-col justify-between shadow-[0_4px_30px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.03] group relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all" />
-            <div>
-              <div className="w-12 h-12 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
-                <Keyboard className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 tracking-wide">Intercept Signal Route</h3>
-              <p className="text-slate-400 text-xs leading-relaxed mb-8 font-medium">
-                Input the 9-character matrix tracking link token generated by an external node manager to connect.
-              </p>
-              
-              <form onSubmit={handleJoinMeeting} className="space-y-4">
-                <input
-                  type="text"
-                  required
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value)}
-                  placeholder="Xxx-xxx-xxx"
-                  className="w-full px-4 py-3.5 bg-black/20 border border-white/[0.06] rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white/[0.04] focus:ring-1 focus:ring-purple-500/30 text-xs transition-all duration-200 text-white placeholder-slate-600 tracking-widest text-center uppercase font-black font-mono text-purple-300"
-                />
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-slate-200 hover:text-white rounded-xl font-bold text-xs transition-all duration-200 border border-white/[0.05] hover:border-white/[0.1] shadow-xl cursor-pointer flex items-center justify-center gap-2"
+          {/* =====================================================
+              JOIN MEETING
+          ====================================================== */}
+
+          <div className="group relative">
+
+            <div className="absolute -inset-px rounded-[28px] bg-gradient-to-br from-purple-500/20 via-transparent to-fuchsia-500/10 opacity-0 group-hover:opacity-100 blur-sm transition duration-500" />
+
+            <div className="relative h-full rounded-[28px] bg-[#0c101d]/90 backdrop-blur-2xl border border-white/[0.07] overflow-hidden transition-all duration-300 group-hover:border-purple-500/20">
+
+              {/* Decorative glow */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-purple-600/10 blur-[70px] pointer-events-none" />
+
+              <div className="relative p-7 sm:p-8">
+
+                {/* Icon */}
+                <div className="flex items-start justify-between mb-7">
+
+                  <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/15 flex items-center justify-center shadow-lg shadow-purple-500/5">
+                    <Keyboard className="w-7 h-7 text-purple-400" />
+                  </div>
+
+                  <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/10 text-[9px] text-purple-400 font-black uppercase tracking-widest">
+                    Join
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                  Join a Meeting
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-500 leading-relaxed max-w-md">
+                  Have a meeting code? Enter it below to instantly connect
+                  to an existing collaboration session.
+                </p>
+
+                {/* Form */}
+                <form
+                  onSubmit={handleJoinMeeting}
+                  className="mt-8 space-y-4"
                 >
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest font-black text-slate-500 mb-2">
+                      Meeting Code
+                    </label>
+
+                    <input
+                      type="text"
+                      required
+                      value={joinCode}
+                      onChange={(e) =>
+                        setJoinCode(e.target.value.toLowerCase())
+                      }
+                      placeholder="e.g. abc123xyz"
+                      maxLength={20}
+                      className="w-full px-4 py-4 bg-black/30 border border-white/[0.07] rounded-2xl outline-none text-sm text-white placeholder:text-slate-700 focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/5 transition-all font-mono tracking-[0.15em]"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-purple-500/30 text-slate-200 hover:text-white font-black text-sm transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    Join Meeting
+                    <ArrowRight className="w-4 h-4 text-purple-400" />
+                  </button>
+                </form>
+
+                {/* Features */}
+                <div className="grid grid-cols-3 gap-2 mt-6">
+
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <Zap className="w-4 h-4 text-purple-400 mb-2" />
+                    <p className="text-[9px] text-slate-500 font-bold">
+                      Instant
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <Radio className="w-4 h-4 text-purple-400 mb-2" />
+                    <p className="text-[9px] text-slate-500 font-bold">
+                      Real-time
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <Clock3 className="w-4 h-4 text-purple-400 mb-2" />
+                    <p className="text-[9px] text-slate-500 font-bold">
+                      No Setup
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================
+            BOTTOM INFORMATION BAR
+        ========================================================== */}
+
+        <section className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+          <div className="flex items-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-slate-600 font-black">
+                Security
+              </p>
+
+              <p className="text-xs text-slate-300 font-semibold">
+                Protected Session
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+            <Activity className="w-5 h-5 text-indigo-400" />
+
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-slate-600 font-black">
+                Network
+              </p>
+
+              <p className="text-xs text-slate-300 font-semibold">
+                Real-time Connection
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+            <Sparkles className="w-5 h-5 text-purple-400" />
+
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-slate-600 font-black">
+                Intelligence
+              </p>
+
+              <p className="text-xs text-slate-300 font-semibold">
+                AI Ready Workspace
+              </p>
+            </div>
+          </div>
+
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-10 text-center">
+          <p className="text-[9px] text-slate-700 uppercase tracking-[0.3em] font-bold">
+            IntellMeet • AI-Powered Enterprise Collaboration
+          </p>
+        </footer>
+
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
