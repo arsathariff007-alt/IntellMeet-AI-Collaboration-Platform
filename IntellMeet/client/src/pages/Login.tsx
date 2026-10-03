@@ -19,7 +19,7 @@ export const Login: React.FC = () => {
 
     try {
       // Hardcoded directly to your secure, live running backend service login gateway path
-      const response = await fetch('https://intellmeet-ai-collaboration-platform-1.onrender.com', {
+     const response = await fetch('https://intellmeet-ai-collaboration-platform-1.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
