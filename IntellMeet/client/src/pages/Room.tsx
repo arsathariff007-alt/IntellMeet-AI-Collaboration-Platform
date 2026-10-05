@@ -843,29 +843,29 @@ const roomId = roomCode;
         >
           {/* VIDEO AREA */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* LOCAL VIDEO */}
-            <div className="relative bg-black rounded-3xl overflow-hidden border border-white/[0.08] min-h-[300px]">
-             <video
-  ref={remoteVideoRef}
-  autoPlay
-  playsInline
-  controls={false}
-  className="w-full h-full object-cover"
-/>
+         {/* LOCAL VIDEO */}
+<div className="relative bg-black rounded-3xl overflow-hidden border border-white/[0.08] min-h-[300px]">
+  <video
+    ref={localVideoRef}
+    autoPlay
+    muted
+    playsInline
+    controls={false}
+    className="w-full h-full object-cover"
+  />
 
-              {isVideoStopped && (
-                <div className="absolute inset-0 bg-slate-950 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
-                    {userName.slice(0, 2).toUpperCase()}
-                  </div>
-                </div>
-              )}
+  {isVideoStopped && (
+    <div className="absolute inset-0 bg-slate-950 flex items-center justify-center">
+      <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
+        {userName.slice(0, 2).toUpperCase()}
+      </div>
+    </div>
+  )}
 
-              <div className="absolute bottom-4 left-4 px-3 py-2 rounded-xl bg-black/60 backdrop-blur-md text-xs text-white">
-                {userName} (You)
-              </div>
-            </div>
-
+  <div className="absolute bottom-4 left-4 px-3 py-2 rounded-xl bg-black/60 backdrop-blur-md text-xs text-white">
+    {userName} (You)
+  </div>
+</div>
             {/* REMOTE VIDEO */}
             <div className="relative bg-[#0b0e16] rounded-3xl overflow-hidden border border-white/[0.08] min-h-[300px]">
               <video
