@@ -85,6 +85,7 @@ IntellMeet/
 │   ├── server.js
 │   └── package.json
 │
+├── .gitignore
 └── README.md
 ```
 
@@ -122,14 +123,13 @@ Create `server/.env`:
 PORT=8000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_secure_jwt_secret
+JWT_REFRESH_SECRET=your_secure_refresh_token_secret
+JWT_EXPIRE=15m
+JWT_REFRESH_EXPIRE=7d
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
-
-### Client
-
-For local development, configure the frontend API URL according to your local or deployed backend.
 
 Do not commit passwords, JWT secrets, database credentials, or private API keys.
 
@@ -139,7 +139,7 @@ Do not commit passwords, JWT secrets, database credentials, or private API keys.
 
 ```bash
 git clone https://github.com/arsathariff007-alt/IntellMeet-AI-Collaboration-Platform.git
-cd IntellMeet/IntellMeet
+cd IntellMeet
 ```
 
 ### 2. Install frontend dependencies
@@ -163,7 +163,7 @@ http://localhost:5173
 
 ### 4. Install backend dependencies
 
-Open another terminal:
+Open another terminal from the `IntellMeet` directory:
 
 ```bash
 cd server
